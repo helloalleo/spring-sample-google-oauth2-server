@@ -1,0 +1,3 @@
+rootProject.name = 'SampleGoogleAuthSB'
+include 'authorizationserver'
+include 'client'

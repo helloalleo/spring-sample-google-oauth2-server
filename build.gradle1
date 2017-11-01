@@ -1,0 +1,115 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+        maven { url "http://repo.spring.io/plugins-release" }
+        maven { url "http://repo.spring.io/milestone" }
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${spring_boot_version}"
+        classpath "org.springframework.build.gradle:propdeps-plugin:0.0.7"
+
+        classpath "io.spring.gradle:dependency-management-plugin:0.6.1.RELEASE"
+    }
+}
+
+group 'com.example'
+version '1.0'
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'idea'
+    apply plugin: 'maven'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'propdeps'
+    apply plugin: 'io.spring.dependency-management'
+
+    group = 'com.example'
+    version = '1.0'
+}
+
+subprojects {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+        maven { url 'http://repo.spring.io/milestone' }
+        maven { url 'http://repo.spring.io/snapshot' }
+        maven { url 'https://repository.jboss.org/nexus/content/repositories/releases' }
+        maven { url 'https://oss.sonatype.org/content/repositories/releases' }
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+        maven { url 'http://repo.maven.apache.org/maven2' }
+        maven { url 'https://maven.atlassian.com/repository/internal' }
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.boot:spring-boot-dependencies:${spring_boot_version}"
+        }
+    }
+
+    dependencies {
+        compile 'org.springframework.boot:spring-boot-starter-web'
+        compile 'org.springframework.boot:spring-boot-starter-web-services'
+        compile 'org.springframework.boot:spring-boot-starter-jersey'
+        compile 'org.springframework.security.oauth:spring-security-oauth2'
+        compile 'org.springframework.boot:spring-boot-starter-security'
+        compile 'org.springframework.boot:spring-boot-devtools'
+
+        compile 'org.apache.commons:commons-lang3:3.5'
+        compile 'org.apache.commons:commons-collections4:4.1'
+
+        testCompile 'org.springframework.boot:spring-boot-starter-test'
+    }
+}
+
+project(':authorizationserver') {
+    bootRepackage.enabled = false
+    findMainClass.enabled = false
+
+    configurations {
+        runtime.exclude group: "org.slf4j", module: "slf4j-simple"
+        compile.exclude group: "org.slf4j", module: "slf4j-simple"
+    }
+
+    springBoot {
+        mainClass = 'com.example.SampleGoogleAuthSbApplication'
+        executable = true
+        buildInfo()
+    }
+
+    dependencies {
+        compile 'org.webjars:angularjs:1.4.10'
+        compile 'org.webjars:jquery:2.2.4'
+        compile 'org.webjars:bootstrap:3.2.0'
+        compile 'org.webjars:webjars-locator:0.32-1'
+    }
+
+    task stage(dependsOn: 'bootRepackage') {
+    }
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+defaultTasks 'bootRun'
+
+repositories {
+    mavenCentral()
+}
+
+clean {
+    delete "target"
+}
+
+task cleanResources(type: Delete) {
+    delete 'build/resources'
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.0'
+}
+
+bootRepackage.enabled = false
